@@ -13,7 +13,7 @@ public class UserStoryController {
     @Autowired
     UserStoryRepository userStoryRepository;
 
-    @GetMapping("/guest")
+    @GetMapping("/us")
     public List<UserStoryEntity> getGuests(@RequestParam(required = false) String name) {
         if (name != null && !name.equals("")) {
             return userStoryRepository.findTop8ByNameIgnoreCaseContainingOrderByName(name);
