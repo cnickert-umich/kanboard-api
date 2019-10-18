@@ -1,4 +1,4 @@
-package edu.umich.kanboard.kanboardapi;
+package edu.umich.kanboard;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
