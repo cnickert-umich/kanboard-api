@@ -1,6 +1,7 @@
 package edu.umich.kanboard.userstory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +15,7 @@ public class UserStoryController {
     UserStoryRepository userStoryRepository;
 
     @GetMapping("/us")
+    @CrossOrigin
     public List<UserStoryEntity> getGuests(@RequestParam(required = false) String name) {
         if (name != null && !name.equals("")) {
             return userStoryRepository.findTop8ByNameIgnoreCaseContainingOrderByName(name);
