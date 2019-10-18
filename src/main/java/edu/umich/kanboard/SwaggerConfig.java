@@ -1,4 +1,4 @@
-package edu.umich.kanboard.kanboardapi;
+package edu.umich.kanboard;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
