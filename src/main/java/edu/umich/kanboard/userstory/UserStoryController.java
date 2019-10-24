@@ -17,11 +17,11 @@ public class UserStoryController {
     @Autowired
     UserStoryRepository userStoryRepository;
 
-    @ApiOperation(value = "Get All User Stories", notes = "Gets all User Stories ", response = UserStoryEntity.class, responseContainer = "List", httpMethod = "GET", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Get All User Stories", notes = "Gets all User Stories ", response = UserStoryEntity.class, responseContainer = "List", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success")
     })
-    @GetMapping("/us")
+    @PostMapping("/us/search")
     @CrossOrigin
     public List<UserStoryEntity> getUserStories(
             @ApiParam(name = "name", value = "Optional User Story Name", required = false)
@@ -40,7 +40,7 @@ public class UserStoryController {
         return userStoryRepository.findAll();
     }
 
-    @PostMapping("/us")
+    @PostMapping("/us/save")
     @CrossOrigin
     public UserStoryEntity saveUserStory(
             @ApiParam(name = "User Story", value = "User Story", required = false, format = "application/json")
@@ -49,4 +49,5 @@ public class UserStoryController {
 
         return userStoryRepository.save(userStoryEntity);
     }
+
 }
