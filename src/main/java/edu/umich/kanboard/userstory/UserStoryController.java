@@ -5,8 +5,11 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +31,10 @@ public class UserStoryController {
             @RequestBody(required = false)
                     UserStoryEntity searchEntity) {
 
+        if(searchEntity == null) {
+            return userStoryRepository.findAll();
+        }
+
         Integer id = searchEntity.getUserStoryId();
         String name = searchEntity.getName();
 
@@ -37,7 +44,7 @@ public class UserStoryController {
             return userStoryRepository.findTop8ByNameIgnoreCaseContainingOrderByName(name);
         }
 
-        return userStoryRepository.findAll();
+        return Collections.EMPTY_LIST;
     }
 
     @PostMapping("/us/save")
