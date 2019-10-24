@@ -8,6 +8,8 @@ public interface UserStoryRepository extends CrudRepository<UserStoryEntity, Lon
 
     List<UserStoryEntity> findAll();
 
+    UserStoryEntity findByUserStoryId(Integer userStoryId);
+
     List<UserStoryEntity> findTop8ByNameIgnoreCaseContainingOrderByName(String name);
 
     UserStoryEntity save(UserStoryEntity userStoryEntity);

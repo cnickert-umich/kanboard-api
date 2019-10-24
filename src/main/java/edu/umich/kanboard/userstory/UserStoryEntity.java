@@ -19,16 +19,16 @@ public class UserStoryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ApiModelProperty(notes = "The User Story ID")
     @Nullable
-    Integer userStoryId;
+    private Integer userStoryId;
 
     @Column
     @ApiModelProperty(notes = "The name of the User Story")
     @NotNull
-    String name;
+    private String name;
 
     @Column
     @ApiModelProperty(notes = "The User Story's description")
     @NotNull
-    String description;
+    private String description;
 
 }
