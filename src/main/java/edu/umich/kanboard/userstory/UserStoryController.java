@@ -13,12 +13,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 
+import javax.sql.DataSource;
 import javax.xml.ws.Response;
 import java.util.Collections;
 import java.util.List;
 
 @RestController
 public class UserStoryController {
+
+    @Autowired
+    DataSource dataSource;
 
     @Autowired
     UserStoryRepository userStoryRepository;
@@ -30,6 +34,7 @@ public class UserStoryController {
     @GetMapping("/us")
     @CrossOrigin
     public ResponseEntity<List<UserStoryEntity>> getAllUserStories() {
+        System.out.println(dataSource);
         return ResponseEntity.ok(userStoryRepository.findAll());
     }
 
