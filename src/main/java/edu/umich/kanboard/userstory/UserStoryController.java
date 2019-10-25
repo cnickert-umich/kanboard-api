@@ -1,6 +1,5 @@
 package edu.umich.kanboard.userstory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -11,11 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 
 import javax.sql.DataSource;
-import javax.xml.ws.Response;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -48,7 +44,7 @@ public class UserStoryController {
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         UserStoryEntity userStory = userStoryRepository.findByUserStoryId(id);
-        if(userStory == null) {
+        if (userStory == null) {
             return new ResponseEntity<>(new UserStoryEntity(), headers, HttpStatus.OK);
         }
 
@@ -67,7 +63,7 @@ public class UserStoryController {
             @RequestBody(required = true)
                     UserStoryEntity userStoryEntity) {
 
-        if(userStoryEntity.getStoryStatus() == null) {
+        if (userStoryEntity.getStoryStatus() == null) {
             userStoryEntity.setStoryStatus(UserStoryStatus.DEFINED);
         }
 
