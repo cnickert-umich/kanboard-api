@@ -34,7 +34,6 @@ public class UserStoryController {
     @GetMapping("/us")
     @CrossOrigin
     public ResponseEntity<List<UserStoryEntity>> getAllUserStories() {
-        System.out.println(dataSource);
         return ResponseEntity.ok(userStoryRepository.findAll());
     }
 
