@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class KanboardApiApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(KanboardApiApplication.class, args);
+    }
 
-	public static void main(String[] args) {
-		SpringApplication.run(KanboardApiApplication.class, args);
-	}
 
 }

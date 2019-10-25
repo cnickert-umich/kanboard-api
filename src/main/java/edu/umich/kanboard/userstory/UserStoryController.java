@@ -1,6 +1,5 @@
 package edu.umich.kanboard.userstory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -11,10 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 
-import javax.xml.ws.Response;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -39,12 +35,12 @@ public class UserStoryController {
     })
     @GetMapping("/us/{id}")
     @CrossOrigin
-    public ResponseEntity<UserStoryEntity> getUserStory(@PathVariable Integer id) {
+    public ResponseEntity<UserStoryEntity> getUserStory(@PathVariable Long id) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         UserStoryEntity userStory = userStoryRepository.findByUserStoryId(id);
-        if(userStory == null) {
+        if (userStory == null) {
             return new ResponseEntity<>(new UserStoryEntity(), headers, HttpStatus.OK);
         }
 
@@ -52,16 +48,33 @@ public class UserStoryController {
 
     }
 
-    @ApiOperation(value = "Save a User Story", notes = "Saves a given User Story", response = UserStoryEntity.class, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Creates or Updates a User Story", notes = "Will update or save a User Story based on if the User Story already exists", response = UserStoryEntity.class, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success")
     })
     @PostMapping("/us")
     @CrossOrigin
-    public ResponseEntity<UserStoryEntity> saveUserStory(
+    public ResponseEntity<UserStoryEntity> createOrUpdateAUserStory(
             @ApiParam(name = "User Story", value = "User Story", required = false, format = MediaType.APPLICATION_JSON_VALUE)
             @RequestBody(required = true)
                     UserStoryEntity userStoryEntity) {
+
+        if (userStoryEntity.getStoryStatus() == null) {
+            userStoryEntity.setStoryStatus(UserStoryStatus.DEFINED);
+        }
+
         return ResponseEntity.ok(userStoryRepository.save(userStoryEntity));
+    }
+
+    @ApiOperation(value = "Delete a User Story", notes = "Deletes a Specific User Story", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success")
+    })
+    @DeleteMapping("/us/{id}")
+    @CrossOrigin
+    public ResponseEntity<UserStoryEntity> deleteUserStory(@PathVariable Long id) {
+        UserStoryEntity userStoryEntity = userStoryRepository.findByUserStoryId(id);
+        userStoryRepository.deleteById(id);
+        return ResponseEntity.ok(userStoryEntity);
     }
 }
