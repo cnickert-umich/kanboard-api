@@ -25,7 +25,7 @@ public class ColumnServiceTest {
         expected.setName("DEFINED");
 
         when(columnRepository.save(expected)).thenReturn(expected);
-        ColumnEntity actual = columnService.save(expected);
+        ColumnEntity actual = columnService.createOrUpdateColumn(expected);
         verify(columnRepository).save(expected);
         assertThat(expected).isEqualTo(actual);
     }
@@ -35,7 +35,7 @@ public class ColumnServiceTest {
         ColumnEntity col = new ColumnEntity();
         col.setName(null);
 
-        ColumnEntity actual = columnService.save(col);
+        ColumnEntity actual = columnService.createOrUpdateColumn(col);
         verify(columnRepository, times(0)).save(col);
         assertThat(actual).isNull();
     }
@@ -45,7 +45,7 @@ public class ColumnServiceTest {
         ColumnEntity col = new ColumnEntity();
         col.setName("");
 
-        ColumnEntity actual = columnService.save(col);
+        ColumnEntity actual = columnService.createOrUpdateColumn(col);
         verify(columnRepository, times(0)).save(col);
         assertThat(actual).isNull();
 
@@ -58,7 +58,7 @@ public class ColumnServiceTest {
 
         when(columnRepository.count()).thenReturn((long) ColumnConstants.MAX_COLUMNS);
 
-        ColumnEntity result = columnService.save(newCol);
+        ColumnEntity result = columnService.createOrUpdateColumn(newCol);
         verify(columnRepository, times(0)).save(newCol);
 
         assertThat(result).isNull();
@@ -70,8 +70,27 @@ public class ColumnServiceTest {
         expected.setName(StringUtils.repeat("*", ColumnConstants.MAX_COLUMN_STRING_LENGTH + 1));
 
 
-        ColumnEntity actual = columnService.save(expected);
+        ColumnEntity actual = columnService.createOrUpdateColumn(expected);
         verify(columnRepository, times(0)).save(expected);
         assertThat(actual).isNull();
+    }
+
+    @Test
+    public void deleteColumn_happyPath() {
+        ColumnEntity col = mock(ColumnEntity.class);
+        when(columnRepository.count()).thenReturn((long) ColumnConstants.MIN_COLUMNS + 1);
+
+
+        columnService.deleteColumn(col);
+        verify(columnRepository).delete(col);
+    }
+
+    @Test
+    public void deleteColumn_failDoesNotMeetMinimumColumnRequirements() {
+        ColumnEntity col = mock(ColumnEntity.class);
+        when(columnRepository.count()).thenReturn((long) ColumnConstants.MIN_COLUMNS);
+
+        columnService.deleteColumn(col);
+        verify(columnRepository, times(0)).delete(col);
     }
 }

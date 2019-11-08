@@ -9,7 +9,7 @@ public class ColumnService {
     @Autowired
     private ColumnRepository columnRepository;
 
-    public ColumnEntity save(ColumnEntity column) {
+    public ColumnEntity createOrUpdateColumn(ColumnEntity column) {
 
         if (column.getName() == null || column.getName().equals("")) {
             return null;
@@ -19,10 +19,17 @@ public class ColumnService {
             return null;
         }
 
-        if(column.getName().length() > ColumnConstants.MAX_COLUMN_STRING_LENGTH) {
+        if (column.getName().length() > ColumnConstants.MAX_COLUMN_STRING_LENGTH) {
             return null;
         }
 
         return columnRepository.save(column);
+    }
+
+    public void deleteColumn(ColumnEntity column) {
+
+        if (columnRepository.count() > ColumnConstants.MIN_COLUMNS) {
+            columnRepository.delete(column);
+        }
     }
 }
