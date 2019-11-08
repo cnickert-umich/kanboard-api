@@ -2,6 +2,7 @@ package edu.umich.kanboard.userstory;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import edu.umich.kanboard.column.ColumnEntity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,9 +34,8 @@ public class UserStoryEntity {
     @NotNull
     private String description;
 
-    @Column
-    @ApiModelProperty(notes = "The User Story Status")
-    @Enumerated(EnumType.STRING)
-    private UserStoryStatus storyStatus;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "columnId", referencedColumnName = "id")
+    private ColumnEntity column;
 
 }
