@@ -7,6 +7,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -27,7 +30,7 @@ public class ColumnServiceTest {
         when(columnRepository.save(expected)).thenReturn(expected);
         ColumnEntity actual = columnService.createOrUpdateColumn(expected);
         verify(columnRepository).save(expected);
-        assertThat(expected).isEqualTo(actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -92,5 +95,34 @@ public class ColumnServiceTest {
 
         columnService.deleteColumn(col);
         verify(columnRepository, times(0)).delete(col);
+    }
+
+    @Test
+    public void getAllColumns() {
+        List<ColumnEntity> expected = new ArrayList<>();
+        for (int i = 0; i < ColumnConstants.MAX_COLUMNS; i++) {
+            expected.add(mock(ColumnEntity.class));
+        }
+
+        when(columnRepository.findAll()).thenReturn(expected);
+
+        List<ColumnEntity> actual = columnService.getAllColumns();
+        verify(columnRepository).findAll();
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    public void getDefaultColumn() {
+        List<ColumnEntity> entities = new ArrayList<>();
+        for (long i = 0; i < ColumnConstants.MAX_COLUMNS; i++) {
+            entities.add(new ColumnEntity(i, "LOOSE MOOSE"));
+        }
+        entities.add(new ColumnEntity((long) -1, "Blah blah blah"));
+
+        ColumnEntity min = entities.get(entities.size() - 1);
+        when(columnRepository.findAll()).thenReturn(entities);
+        ColumnEntity actual = columnService.getDefaultColumnStatus();
+        verify(columnRepository).findAll();
+        assertThat(actual).isEqualTo(min);
     }
 }

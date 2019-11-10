@@ -1,5 +1,6 @@
 package edu.umich.kanboard.userstory;
 
+import edu.umich.kanboard.column.ColumnService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -17,7 +18,10 @@ import java.util.List;
 public class UserStoryController {
 
     @Autowired
-    UserStoryRepository userStoryRepository;
+    private UserStoryRepository userStoryRepository;
+
+    @Autowired
+    private ColumnService columnService;
 
     @ApiOperation(value = "Get All User Stories", notes = "Gets all User Stories ", response = UserStoryEntity.class, responseContainer = "List", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
@@ -59,9 +63,8 @@ public class UserStoryController {
             @RequestBody(required = true)
                     UserStoryEntity userStoryEntity) {
 
-        //TODO: Set story status
-        if(userStoryEntity.getColumn() == null) {
-
+        if (userStoryEntity.getColumn() == null) {
+            userStoryEntity.setColumn(columnService.getDefaultColumnStatus());
         }
 
         return ResponseEntity.ok(userStoryRepository.save(userStoryEntity));

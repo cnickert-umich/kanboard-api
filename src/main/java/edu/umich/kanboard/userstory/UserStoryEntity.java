@@ -34,8 +34,7 @@ public class UserStoryEntity {
     @NotNull
     private String description;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "columnId", referencedColumnName = "id")
+    @ManyToOne
     private ColumnEntity column;
 
 }
