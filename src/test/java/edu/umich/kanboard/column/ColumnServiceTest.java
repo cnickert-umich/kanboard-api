@@ -1,5 +1,7 @@
 package edu.umich.kanboard.column;
 
+import edu.umich.kanboard.userstory.UserStoryEntity;
+import edu.umich.kanboard.userstory.UserStoryService;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,6 +24,9 @@ public class ColumnServiceTest {
 
     @Mock
     ColumnRepository columnRepository;
+
+    @Mock
+    UserStoryService userStoryService;
 
     @Test
     public void createNewColumn_success() {
@@ -79,13 +85,54 @@ public class ColumnServiceTest {
     }
 
     @Test
-    public void deleteColumn_happyPath() {
-        ColumnEntity col = mock(ColumnEntity.class);
-        when(columnRepository.count()).thenReturn((long) ColumnConstants.MIN_COLUMNS + 1);
+    public void deleteColumn_noUserStories() {
+        List<ColumnEntity> columns = new ArrayList<>();
+        for (long i = 0; i < ColumnConstants.MAX_COLUMNS; i++) {
+            columns.add(new ColumnEntity(i, "Garbage: " + i));
+        }
 
+        ColumnEntity colToDelete = columns.get(0);
 
-        columnService.deleteColumn(col);
-        verify(columnRepository).delete(col);
+        when(columnRepository.findAll()).thenReturn(columns);
+        when(columnRepository.count()).thenReturn((long) columns.size());
+        when(userStoryService.getAllUserStories()).thenReturn(Collections.emptyList());
+
+        columnService.deleteColumn(colToDelete);
+        verify(columnRepository).delete(colToDelete);
+    }
+
+    @Test
+    public void deleteColumn_userStoryWithDeletedColumn() {
+
+        final int indexToDelete = (int) (ColumnConstants.MAX_COLUMNS * Math.random());
+
+        // Create columns
+        List<ColumnEntity> columns = new ArrayList<>();
+        for (long i = 0; i < ColumnConstants.MAX_COLUMNS; i++) {
+            columns.add(new ColumnEntity(i, "Garbage: " + i));
+        }
+
+        // Add user stories (one with column being deleted)
+        List<UserStoryEntity> userStories = new ArrayList<>();
+        for(int i = 0; i < ColumnConstants.MAX_COLUMNS; i++) {
+            UserStoryEntity userStory = new UserStoryEntity();
+            userStory.setColumn(columns.get(i));
+            userStories.add(userStory);
+        }
+
+        ColumnEntity colToDelete = columns.get(indexToDelete);
+
+        when(columnRepository.findAll()).thenReturn(columns);
+        when(columnRepository.count()).thenReturn((long) columns.size());
+        when(userStoryService.getAllUserStories()).thenReturn(userStories);
+
+        columnService.deleteColumn(colToDelete);
+        verify(columnRepository).delete(colToDelete);
+
+        for (UserStoryEntity userStory : userStories) {
+            assertThat(userStory.getColumn().getName()).isNotEqualTo(colToDelete.getName());
+            assertThat(userStory.getColumn().getId()).isNotEqualTo(colToDelete.getId());
+        }
     }
 
     @Test

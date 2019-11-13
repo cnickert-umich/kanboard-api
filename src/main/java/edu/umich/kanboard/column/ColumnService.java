@@ -1,10 +1,12 @@
 package edu.umich.kanboard.column;
 
+import edu.umich.kanboard.userstory.UserStoryEntity;
+import edu.umich.kanboard.userstory.UserStoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -12,6 +14,9 @@ public class ColumnService {
 
     @Autowired
     private ColumnRepository columnRepository;
+
+    @Autowired
+    private UserStoryService userStoryService;
 
     public ColumnEntity createOrUpdateColumn(ColumnEntity column) {
 
@@ -30,30 +35,38 @@ public class ColumnService {
         return columnRepository.save(column);
     }
 
-    public void deleteColumn(ColumnEntity column) {
-
-        if (columnRepository.count() > ColumnConstants.MIN_COLUMNS) {
-            columnRepository.delete(column);
+    public void deleteColumn(ColumnEntity columnToDelete) {
+        if (columnRepository.count() <= ColumnConstants.MIN_COLUMNS) {
+            return;
         }
+
+        List<ColumnEntity> columnEntities = new ArrayList<>();
+        columnRepository.findAll().iterator().forEachRemaining(columnEntities::add);
+        columnEntities.sort(Comparator.comparing(ColumnEntity::getId));
+
+        ColumnEntity replacementColumn = columnEntities.get(0);
+
+        if (replacementColumn.equals(columnToDelete)) {
+            replacementColumn = columnEntities.get(1);
+        }
+
+        // Update user story column if we're deleting it
+        for(UserStoryEntity userStory: userStoryService.getAllUserStories()) {
+            if(userStory.getColumn().equals(columnToDelete)) {
+                userStory.setColumn(replacementColumn);
+                userStoryService.saveUserStory(userStory);
+            }
+        }
+
+        columnRepository.delete(columnToDelete);
     }
 
     public ColumnEntity getDefaultColumnStatus() {
-        ColumnEntity min = null;
-        Iterator<ColumnEntity> iterator = columnRepository.findAll().iterator();
+        List<ColumnEntity> columnEntities = new ArrayList<>();
+        columnRepository.findAll().iterator().forEachRemaining(columnEntities::add);
 
-        while (iterator.hasNext()) {
-            ColumnEntity current = iterator.next();
-
-            if (min == null) {
-                min = iterator.next();
-            }
-
-            if (current.getId() < min.getId()) {
-                min = current;
-            }
-        }
-
-        return min;
+        columnEntities.sort(Comparator.comparing(ColumnEntity::getId));
+        return columnEntities.get(0);
     }
 
     public List<ColumnEntity> getAllColumns() {
