@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +37,7 @@ public class ColumnController {
     @CrossOrigin
     public ResponseEntity<ColumnEntity> createOrUpdateAColumn(
             @ApiParam(name = "ColumnEntity", value = "Column", required = true, format = MediaType.APPLICATION_JSON_VALUE)
-            @RequestBody(required = true)
+            @RequestBody
                     ColumnEntity columnEntity) {
         return ResponseEntity.ok(columnService.createOrUpdateColumn(columnEntity));
     }
@@ -51,15 +50,8 @@ public class ColumnController {
     @DeleteMapping("/column/{id}")
     @CrossOrigin
     public ResponseEntity<ColumnEntity> deleteColumn(@PathVariable Long id) {
-        List<ColumnEntity> columnEntities = columnService.getAllColumns();
-        for (ColumnEntity cursor : columnEntities) {
-            if (cursor.getId().equals(id)) {
-                columnService.deleteColumn(cursor);
-                return ResponseEntity.ok(cursor);
-            }
-        }
-
-        return new ResponseEntity<>(new ColumnEntity(), HttpStatus.NOT_FOUND);
+        columnService.deleteColumn(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

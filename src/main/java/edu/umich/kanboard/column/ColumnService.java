@@ -35,7 +35,7 @@ public class ColumnService {
         return columnRepository.save(column);
     }
 
-    public void deleteColumn(ColumnEntity columnToDelete) {
+    public void deleteColumn(long columnId) {
         if (columnRepository.count() <= ColumnConstants.MIN_COLUMNS) {
             return;
         }
@@ -46,19 +46,19 @@ public class ColumnService {
 
         ColumnEntity replacementColumn = columnEntities.get(0);
 
-        if (replacementColumn.equals(columnToDelete)) {
+        if (replacementColumn.getId().equals(columnId)) {
             replacementColumn = columnEntities.get(1);
         }
 
         // Update user story column if we're deleting it
-        for(UserStoryEntity userStory: userStoryService.getAllUserStories()) {
-            if(userStory.getColumn().equals(columnToDelete)) {
+        for (UserStoryEntity userStory : userStoryService.getAllUserStories()) {
+            if (userStory.getColumn().getId().equals(columnId)) {
                 userStory.setColumn(replacementColumn);
                 userStoryService.saveUserStory(userStory);
             }
         }
 
-        columnRepository.delete(columnToDelete);
+        columnRepository.deleteById(columnId);
     }
 
     public ColumnEntity getDefaultColumnStatus() {

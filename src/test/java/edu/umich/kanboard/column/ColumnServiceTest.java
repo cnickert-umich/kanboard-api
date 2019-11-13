@@ -91,14 +91,13 @@ public class ColumnServiceTest {
             columns.add(new ColumnEntity(i, "Garbage: " + i));
         }
 
-        ColumnEntity colToDelete = columns.get(0);
 
         when(columnRepository.findAll()).thenReturn(columns);
         when(columnRepository.count()).thenReturn((long) columns.size());
         when(userStoryService.getAllUserStories()).thenReturn(Collections.emptyList());
 
-        columnService.deleteColumn(colToDelete);
-        verify(columnRepository).delete(colToDelete);
+        columnService.deleteColumn(0);
+        verify(columnRepository).deleteById((long) 0);
     }
 
     @Test
@@ -114,7 +113,7 @@ public class ColumnServiceTest {
 
         // Add user stories (one with column being deleted)
         List<UserStoryEntity> userStories = new ArrayList<>();
-        for(int i = 0; i < ColumnConstants.MAX_COLUMNS; i++) {
+        for (int i = 0; i < ColumnConstants.MAX_COLUMNS; i++) {
             UserStoryEntity userStory = new UserStoryEntity();
             userStory.setColumn(columns.get(i));
             userStories.add(userStory);
@@ -126,8 +125,8 @@ public class ColumnServiceTest {
         when(columnRepository.count()).thenReturn((long) columns.size());
         when(userStoryService.getAllUserStories()).thenReturn(userStories);
 
-        columnService.deleteColumn(colToDelete);
-        verify(columnRepository).delete(colToDelete);
+        columnService.deleteColumn(indexToDelete);
+        verify(columnRepository).deleteById((long) indexToDelete);
 
         for (UserStoryEntity userStory : userStories) {
             assertThat(userStory.getColumn().getName()).isNotEqualTo(colToDelete.getName());
@@ -138,10 +137,12 @@ public class ColumnServiceTest {
     @Test
     public void deleteColumn_failDoesNotMeetMinimumColumnRequirements() {
         ColumnEntity col = mock(ColumnEntity.class);
+        long colIndexToDelete = 0;
+        col.setId(colIndexToDelete);
         when(columnRepository.count()).thenReturn((long) ColumnConstants.MIN_COLUMNS);
 
-        columnService.deleteColumn(col);
-        verify(columnRepository, times(0)).delete(col);
+        columnService.deleteColumn(colIndexToDelete);
+        verify(columnRepository, times(0)).deleteById(colIndexToDelete);
     }
 
     @Test
