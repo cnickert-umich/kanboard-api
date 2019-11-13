@@ -22,7 +22,7 @@ public class UserStoryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @ApiModelProperty(notes = "The User Story ID")
     @Nullable
-    private Long userStoryId;
+    private Long id;
 
     @Column
     @ApiModelProperty(notes = "The name of the User Story")

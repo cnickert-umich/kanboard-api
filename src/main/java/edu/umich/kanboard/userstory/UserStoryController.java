@@ -1,13 +1,10 @@
 package edu.umich.kanboard.userstory;
 
-import edu.umich.kanboard.column.ColumnService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +15,7 @@ import java.util.List;
 public class UserStoryController {
 
     @Autowired
-    private UserStoryRepository userStoryRepository;
-
-    @Autowired
-    private ColumnService columnService;
+    private UserStoryService userStoryService;
 
     @ApiOperation(value = "Get All User Stories", notes = "Gets all User Stories ", response = UserStoryEntity.class, responseContainer = "List", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
@@ -30,7 +24,7 @@ public class UserStoryController {
     @GetMapping("/us")
     @CrossOrigin
     public ResponseEntity<List<UserStoryEntity>> getAllUserStories() {
-        return ResponseEntity.ok(userStoryRepository.findAll());
+        return ResponseEntity.ok(userStoryService.getAllUserStories());
     }
 
     @ApiOperation(value = "Get a User Story", notes = "Gets a user story given an id", response = UserStoryEntity.class, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -40,15 +34,7 @@ public class UserStoryController {
     @GetMapping("/us/{id}")
     @CrossOrigin
     public ResponseEntity<UserStoryEntity> getUserStory(@PathVariable Long id) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-
-        UserStoryEntity userStory = userStoryRepository.findByUserStoryId(id);
-        if (userStory == null) {
-            return new ResponseEntity<>(new UserStoryEntity(), headers, HttpStatus.OK);
-        }
-
-        return new ResponseEntity<>(userStory, headers, HttpStatus.OK);
+        return ResponseEntity.ok(userStoryService.getUserStoryById(id));
 
     }
 
@@ -59,15 +45,11 @@ public class UserStoryController {
     @PostMapping("/us")
     @CrossOrigin
     public ResponseEntity<UserStoryEntity> createOrUpdateAUserStory(
-            @ApiParam(name = "User Story", value = "User Story", required = false, format = MediaType.APPLICATION_JSON_VALUE)
-            @RequestBody(required = true)
-                    UserStoryEntity userStoryEntity) {
+            @ApiParam(name = "User Story", value = "User Story", format = MediaType.APPLICATION_JSON_VALUE)
+            @RequestBody
+                    UserStoryEntity userStory) {
 
-        if (userStoryEntity.getColumn() == null) {
-            userStoryEntity.setColumn(columnService.getDefaultColumnStatus());
-        }
-
-        return ResponseEntity.ok(userStoryRepository.save(userStoryEntity));
+        return ResponseEntity.ok(userStoryService.saveUserStory(userStory));
     }
 
     @ApiOperation(value = "Delete a User Story", notes = "Deletes a Specific User Story", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,9 +58,8 @@ public class UserStoryController {
     })
     @DeleteMapping("/us/{id}")
     @CrossOrigin
-    public ResponseEntity<UserStoryEntity> deleteUserStory(@PathVariable Long id) {
-        UserStoryEntity userStoryEntity = userStoryRepository.findByUserStoryId(id);
-        userStoryRepository.deleteById(id);
-        return ResponseEntity.ok(userStoryEntity);
+    public ResponseEntity<?> deleteUserStory(@PathVariable Long id) {
+        userStoryService.deleteUserStory(id);
+        return ResponseEntity.noContent().build();
     }
 }
