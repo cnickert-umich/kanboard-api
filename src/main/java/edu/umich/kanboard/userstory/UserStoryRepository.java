@@ -1,5 +1,7 @@
 package edu.umich.kanboard.userstory;
 
+import edu.umich.kanboard.column.ColumnEntity;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
@@ -18,4 +20,7 @@ public interface UserStoryRepository extends CrudRepository<UserStoryEntity, Lon
 
     @Override
     void deleteById(Long id);
+
+    @Query("SELECT MAX(us.priority) FROM UserStoryEntity us WHERE us.column = :column")
+    Integer findHighestPriorityBasedOnColumn(ColumnEntity column);
 }

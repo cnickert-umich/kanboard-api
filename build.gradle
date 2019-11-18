@@ -25,6 +25,7 @@ dependencies {
 	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 	implementation 'org.apache.commons:commons-lang3:3.0'
 	implementation 'com.google.code.findbugs:jsr305:3.0.2'
+	implementation 'org.json:json:20090211'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'

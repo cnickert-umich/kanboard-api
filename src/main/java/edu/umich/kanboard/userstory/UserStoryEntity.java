@@ -34,7 +34,13 @@ public class UserStoryEntity {
     @NotNull
     private String description;
 
+    @ApiModelProperty(notes = "The column a User Story is associated with")
     @ManyToOne
     private ColumnEntity column;
+
+    @Column
+    @ApiModelProperty(notes = "The priority associated with the User Story (lower means higher priority)")
+    @NotNull
+    private Integer priority;
 
 }
