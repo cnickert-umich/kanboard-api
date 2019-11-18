@@ -33,10 +33,12 @@ public class UserStoryService {
         }
 
         if (userStoryToSave.getName() == null || userStoryToSave.getName().equals("")) {
+            // No user story name specified
             return null;
         }
 
         if (userStoryToSave.getDescription() == null || userStoryToSave.getDescription().equals("")) {
+            // No user story description specified
             return null;
         }
 
@@ -44,8 +46,19 @@ public class UserStoryService {
             userStoryToSave.setPriority(this.getDefaultPriority(userStoryToSave.getColumn()));
         }
 
-        // Check if user story is new or not
+        if (userStoryToSave.getPriority() <= 0) {
+            // Tried to set priority too low
+            return null;
+        }
+
+        // Check if user story is not new
         if (userStoryToSave.getId() != null) {
+
+            if (userStoryToSave.getPriority() >= getDefaultPriority(userStoryToSave.getColumn())) {
+                // Tried to set priority too high
+                return null;
+            }
+
             UserStoryEntity existingUserStory = userStoryRepository.findById(userStoryToSave.getId()).get();
 
             // Check if column changed
@@ -97,6 +110,9 @@ public class UserStoryService {
 
                 }
             }
+        } else if (userStoryToSave.getPriority() > getDefaultPriority(userStoryToSave.getColumn())) {
+            // Tried to set priority too high
+            return null;
         }
 
         return userStoryRepository.save(userStoryToSave);

@@ -88,7 +88,7 @@ public class UserStoryServiceTest {
         updatedUserStory.setColumn(col);
 
         ArgumentCaptor<UserStoryEntity> captor = ArgumentCaptor.forClass(UserStoryEntity.class);
-
+        when(userStoryRepository.findHighestPriorityBasedOnColumn(col)).thenReturn(NEW_PRIORITY);
         when(userStoryRepository.findAll()).thenReturn(userStoryList);
 
         // Update the user story
@@ -105,6 +105,51 @@ public class UserStoryServiceTest {
         for (int i = 1; i <= savedUserStories.size(); i++) {
             assertThat(savedUserStories.get(i - 1).getPriority()).isEqualTo(i);
         }
+    }
+
+    @Test
+    public void updateUserStory_updatedPriority_tooLow() {
+        final Integer NEW_PRIORITY = 0;
+
+        UserStoryEntity userStoryEntity = createUserStory();
+        userStoryEntity.setPriority(NEW_PRIORITY);
+
+
+        UserStoryEntity actual = userStoryService.saveUserStory(userStoryEntity);
+
+        assertThat(actual).isNull();
+        verify(userStoryRepository, times(0)).save(actual);
+
+    }
+
+    @Test
+    public void updateUserStory_updatedPriority_tooHighExistingUserStory() {
+        final Integer NEW_PRIORITY = 2;
+
+        UserStoryEntity userStoryEntity = createUserStory();
+        userStoryEntity.setPriority(NEW_PRIORITY);
+        userStoryEntity.setId((long) 1);
+
+        when(userStoryRepository.findHighestPriorityBasedOnColumn(userStoryEntity.getColumn())).thenReturn(NEW_PRIORITY - 1);
+        UserStoryEntity actual = userStoryService.saveUserStory(userStoryEntity);
+
+        assertThat(actual).isNull();
+        verify(userStoryRepository, times(0)).save(actual);
+    }
+
+    @Test
+    public void updateUserStory_updatedPriority_tooHighNewUserStory() {
+        final Integer NEW_PRIORITY = 3;
+
+        UserStoryEntity userStoryEntity = createUserStory();
+        userStoryEntity.setPriority(NEW_PRIORITY);
+        userStoryEntity.setId(null);
+
+        when(userStoryRepository.findHighestPriorityBasedOnColumn(userStoryEntity.getColumn())).thenReturn(NEW_PRIORITY - 1);
+        UserStoryEntity actual = userStoryService.saveUserStory(userStoryEntity);
+
+        assertThat(actual).isNull();
+        verify(userStoryRepository, times(0)).save(actual);
     }
 
     @Test
@@ -131,6 +176,7 @@ public class UserStoryServiceTest {
 
         ArgumentCaptor<UserStoryEntity> captor = ArgumentCaptor.forClass(UserStoryEntity.class);
 
+        when(userStoryRepository.findHighestPriorityBasedOnColumn(col)).thenReturn(NEW_PRIORITY);
         when(userStoryRepository.findAll()).thenReturn(userStoryList);
 
         // Update the user story
@@ -240,7 +286,7 @@ public class UserStoryServiceTest {
 
         userStoryService.saveUserStory(expected);
 
-        verify(userStoryRepository, times(1)).findHighestPriorityBasedOnColumn(expected.getColumn());
+        verify(userStoryRepository, times(2)).findHighestPriorityBasedOnColumn(expected.getColumn());
         verify(userStoryRepository, times(1)).save(captor.capture());
 
         assertThat(captor.getValue().getColumn().getName()).isEqualTo(expected.getColumn().getName());
