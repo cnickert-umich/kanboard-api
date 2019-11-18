@@ -54,6 +54,7 @@ public class ColumnService {
         for (UserStoryEntity userStory : userStoryService.getAllUserStories()) {
             if (userStory.getColumn().getId().equals(columnId)) {
                 userStory.setColumn(replacementColumn);
+                userStory.setPriority(userStoryService.getDefaultPriority(replacementColumn));
                 userStoryService.saveUserStory(userStory);
             }
         }

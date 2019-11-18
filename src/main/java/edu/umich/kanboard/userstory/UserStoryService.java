@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,33 +26,33 @@ public class UserStoryService {
         return userStoryRepository.findById(userStoryId).orElse(null);
     }
 
-    public UserStoryEntity saveUserStory(UserStoryEntity newOrExistingUserStory) {
+    public UserStoryEntity saveUserStory(UserStoryEntity userStoryToSave) {
 
-        if (newOrExistingUserStory.getColumn() == null) {
-            newOrExistingUserStory.setColumn(columnService.getDefaultColumnStatus());
+        if (userStoryToSave.getColumn() == null) {
+            userStoryToSave.setColumn(columnService.getDefaultColumnStatus());
         }
 
-        if (newOrExistingUserStory.getName() == null || newOrExistingUserStory.getName().equals("")) {
+        if (userStoryToSave.getName() == null || userStoryToSave.getName().equals("")) {
             return null;
         }
 
-        if (newOrExistingUserStory.getDescription() == null || newOrExistingUserStory.getDescription().equals("")) {
+        if (userStoryToSave.getDescription() == null || userStoryToSave.getDescription().equals("")) {
             return null;
         }
 
-        if (newOrExistingUserStory.getPriority() == null) {
-            newOrExistingUserStory.setPriority(this.getDefaultPriority(newOrExistingUserStory.getColumn()));
+        if (userStoryToSave.getPriority() == null) {
+            userStoryToSave.setPriority(this.getDefaultPriority(userStoryToSave.getColumn()));
         }
 
         // Check if user story is new or not
-        if (newOrExistingUserStory.getId() != null) {
-            UserStoryEntity existingUserStory = userStoryRepository.findById(newOrExistingUserStory.getId()).get();
+        if (userStoryToSave.getId() != null) {
+            UserStoryEntity existingUserStory = userStoryRepository.findById(userStoryToSave.getId()).get();
 
             // Check if column changed
-            if (!existingUserStory.getColumn().equals(newOrExistingUserStory.getColumn())) {
+            if (!existingUserStory.getColumn().equals(userStoryToSave.getColumn())) {
 
                 // Set priority of the user story with column change to highest
-                newOrExistingUserStory.setPriority(this.getDefaultPriority(newOrExistingUserStory.getColumn()));
+                userStoryToSave.setPriority(this.getDefaultPriority(userStoryToSave.getColumn()));
 
                 // update user story priorities of old column
                 List<UserStoryEntity> oldColumnUserStoriesWithHigherPriority = userStoryRepository.findAll().stream()
@@ -64,30 +65,63 @@ public class UserStoryService {
                     userStory.setPriority(userStory.getPriority() - 1);
                     userStoryRepository.save(userStory);
                 }
-            } else if (!existingUserStory.getPriority().equals(newOrExistingUserStory.getPriority())) {
+            } else if (!existingUserStory.getPriority().equals(userStoryToSave.getPriority())) {
+
+                List<UserStoryEntity> updatePriorityList;
 
                 // Filter out a list of user stories
-                List<UserStoryEntity> updatePriorityList = userStoryRepository.findAll().stream()
-                        .filter(foundUserStory -> foundUserStory.getColumn().equals(newOrExistingUserStory.getColumn()))
-                        .filter(foundUserStory -> (foundUserStory.getPriority() >= newOrExistingUserStory.getPriority() && foundUserStory.getPriority() < existingUserStory.getPriority()))
-                        .collect(Collectors.toList());
+                if (userStoryToSave.getPriority() > existingUserStory.getPriority()) {
+                    updatePriorityList = userStoryRepository.findAll().stream()
+                            .filter(foundUserStory -> foundUserStory.getColumn().equals(userStoryToSave.getColumn()))
+                            .filter(foundUserStory -> (foundUserStory.getPriority() > existingUserStory.getPriority() && foundUserStory.getPriority() <= userStoryToSave.getPriority()))
+                            .collect(Collectors.toList());
 
-                // Update the priority by one of every user story whose priority must change
-                for (UserStoryEntity userStory : updatePriorityList) {
-                    userStory.setPriority(userStory.getPriority() + 1);
-                    userStoryRepository.save(userStory);
+                    // Update the priority by one of every user story whose priority must change
+                    for (UserStoryEntity userStory : updatePriorityList) {
+                        userStory.setPriority(userStory.getPriority() - 1);
+                        userStoryRepository.save(userStory);
+                    }
+
+                } else {
+                    updatePriorityList = userStoryRepository.findAll().stream()
+                            .filter(foundUserStory -> foundUserStory.getColumn().equals(userStoryToSave.getColumn()))
+                            .filter(foundUserStory -> (foundUserStory.getPriority() >= userStoryToSave.getPriority() && foundUserStory.getPriority() < existingUserStory.getPriority()))
+                            .collect(Collectors.toList());
+
+                    // Update the priority by one of every user story whose priority must change
+                    for (UserStoryEntity userStory : updatePriorityList) {
+                        userStory.setPriority(userStory.getPriority() + 1);
+                        userStoryRepository.save(userStory);
+                    }
+
+
                 }
             }
         }
 
-        return userStoryRepository.save(newOrExistingUserStory);
+        return userStoryRepository.save(userStoryToSave);
     }
 
     public void deleteUserStory(Long id) {
+        Optional<UserStoryEntity> userStoryToDelete = userStoryRepository.findById(id);
+        if (!userStoryToDelete.isPresent()) {
+            return;
+        }
+
+        List<UserStoryEntity> updateUserStories = userStoryRepository.findAll().stream()
+                .filter(userStory -> userStory.getPriority() > userStoryToDelete.get().getPriority())
+                .collect(Collectors.toList());
+
+        for (UserStoryEntity userStoryEntity : updateUserStories) {
+            userStoryEntity.setPriority(userStoryEntity.getPriority() - 1);
+            userStoryRepository.save(userStoryEntity);
+        }
+
         userStoryRepository.deleteById(id);
+
     }
 
-    private int getDefaultPriority(ColumnEntity column) {
+    public int getDefaultPriority(ColumnEntity column) {
         Integer result = userStoryRepository.findHighestPriorityBasedOnColumn(column);
         if (result == null) {
             return 1;

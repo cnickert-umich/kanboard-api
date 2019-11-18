@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -67,7 +66,7 @@ public class UserStoryServiceTest {
     }
 
     @Test
-    public void updateUserStory_updatedPriority_changesStoryPriorityInCurrentColumn() {
+    public void updateUserStory_updatedPriority_changesStoryPriorityLowerInCurrentColumn() {
         final Integer NEW_PRIORITY = 1;
 
         List<UserStoryEntity> userStoryList = new ArrayList<>();
@@ -77,7 +76,6 @@ public class UserStoryServiceTest {
         for (int i = 1; i <= 5; i++) {
             UserStoryEntity userStory = createUserStory(i);
             userStory.setId((long) i);
-            userStory.setPriority(i);
             userStory.setColumn(col);
             when(userStoryRepository.findById((long) i)).thenReturn(Optional.of(userStory));
             userStoryList.add(userStory);
@@ -88,7 +86,6 @@ public class UserStoryServiceTest {
         updatedUserStory.setId((long) userStoryList.size());
         updatedUserStory.setPriority(NEW_PRIORITY);
         updatedUserStory.setColumn(col);
-
 
         ArgumentCaptor<UserStoryEntity> captor = ArgumentCaptor.forClass(UserStoryEntity.class);
 
@@ -105,10 +102,53 @@ public class UserStoryServiceTest {
         savedUserStories.sort(Comparator.comparing(UserStoryEntity::getPriority));
 
         // Check the priorities are updated
-        for(int i = 1; i <= savedUserStories.size(); i++) {
-            assertThat(savedUserStories.get(i-1).getPriority()).isEqualTo(i);
+        for (int i = 1; i <= savedUserStories.size(); i++) {
+            assertThat(savedUserStories.get(i - 1).getPriority()).isEqualTo(i);
         }
     }
+
+    @Test
+    public void updateUserStory_updatedPriority_changesStoryPriorityHigherInCurrentColumn() {
+        final Integer NEW_PRIORITY = 5;
+
+        List<UserStoryEntity> userStoryList = new ArrayList<>();
+        ColumnEntity col = new ColumnEntity((long) 1, COLUMN_NAME);
+
+        //Create user stories in same column
+        for (int i = 1; i <= 5; i++) {
+            UserStoryEntity userStory = createUserStory(i);
+            userStory.setId((long) i);
+            userStory.setColumn(col);
+            when(userStoryRepository.findById((long) i)).thenReturn(Optional.of(userStory));
+            userStoryList.add(userStory);
+        }
+
+        // Copy the last user story with updated priority
+        UserStoryEntity updatedUserStory = createUserStory(1);
+        updatedUserStory.setId((long) 1);
+        updatedUserStory.setPriority(NEW_PRIORITY);
+        updatedUserStory.setColumn(col);
+
+        ArgumentCaptor<UserStoryEntity> captor = ArgumentCaptor.forClass(UserStoryEntity.class);
+
+        when(userStoryRepository.findAll()).thenReturn(userStoryList);
+
+        // Update the user story
+        userStoryService.saveUserStory(updatedUserStory);
+
+        // Verify the changes
+        verify(userStoryRepository, times(userStoryList.size())).save(captor.capture());
+
+        // Sort the captured saved user stories
+        List<UserStoryEntity> savedUserStories = captor.getAllValues();
+        savedUserStories.sort(Comparator.comparing(UserStoryEntity::getPriority));
+
+        // Check the priorities are updated
+        for (int i = 1; i <= savedUserStories.size(); i++) {
+            assertThat(savedUserStories.get(i - 1).getPriority()).isEqualTo(i);
+        }
+    }
+
 
     // This test is partially hardcoded based on the number of elements.
     // It's a hard case to test, so leaving it as it covers our use case + coverage
@@ -188,7 +228,7 @@ public class UserStoryServiceTest {
     }
 
     @Test
-    public void createUserStory_happyPath_MissingPriority() throws Exception {
+    public void createUserStory_happyPath_MissingPriority() {
         final Integer PRIORITY = 1;
         final Integer NEW_PRIORITY = PRIORITY + 1;
 
@@ -279,58 +319,73 @@ public class UserStoryServiceTest {
     }
 
     @Test
-    public void deleteUserStory() {
+    public void deleteUserStory_invalidId() {
         final long US_ID = 1;
-        UserStoryEntity userStory = createUserStory();
 
+        UserStoryEntity userStory = createUserStory();
         userStory.setId(US_ID);
 
+        when(userStoryRepository.findById(US_ID)).thenReturn(Optional.empty());
         userStoryService.deleteUserStory(US_ID);
-        verify(userStoryRepository, times(1)).deleteById(US_ID);
+        verify(userStoryRepository, times(0)).deleteById(US_ID);
     }
 
     @Test
-    public void getDefaultPriorityBasedOnColumn() throws Exception {
+    public void deleteUserStory_happyPath() {
+        final long US_ID = 7;
+        final int PRIORITY = 1;
+
+        UserStoryEntity userStoryToDelete = createUserStory();
+        userStoryToDelete.setId(US_ID);
+        userStoryToDelete.setPriority(PRIORITY);
+
+        List<UserStoryEntity> userStories = new ArrayList<>();
+
+        for (int i = 2; i < 7; i++) {
+            userStories.add(createUserStory(i));
+        }
+
+        when(userStoryRepository.findById(US_ID)).thenReturn(Optional.of(userStoryToDelete));
+        when(userStoryRepository.findAll()).thenReturn(userStories);
+
+        List<UserStoryEntity> updatePriorityList = userStories.stream()
+                .filter(userStory -> userStory.getPriority() > PRIORITY)
+                .collect(Collectors.toList());
+
+        ArgumentCaptor<UserStoryEntity> captor = ArgumentCaptor.forClass(UserStoryEntity.class);
+        userStoryService.deleteUserStory(US_ID);
+
+        verify(userStoryRepository, times(updatePriorityList.size())).save(captor.capture());
+
+        List<UserStoryEntity> actual = captor.getAllValues();
+        actual.sort(Comparator.comparing(UserStoryEntity::getPriority));
+
+        for (int i = 1; i <= actual.size(); i++) {
+            assertThat(actual.get(i - 1).getPriority()).isEqualTo(i);
+        }
+    }
+
+    @Test
+    public void getDefaultPriorityBasedOnColumn() {
         final int PRIORITY = 1;
         ColumnEntity col = mock(ColumnEntity.class);
 
         when(userStoryRepository.findHighestPriorityBasedOnColumn(col)).thenReturn(PRIORITY);
+        int defaultPriority = userStoryService.getDefaultPriority(col);
 
-        //Make method accessible
-        Method defaultPriorityMethod = UserStoryService.class.getDeclaredMethod("getDefaultPriority", ColumnEntity.class);
-        defaultPriorityMethod.setAccessible(true);
-        Object nextPriority = defaultPriorityMethod.invoke(userStoryService, col);
-
-        if (!(nextPriority instanceof Integer)) {
-            // Will always assert
-            assertThat(true).isEqualTo(false);
-        } else {
-            assertThat((int) nextPriority).isEqualTo(PRIORITY + 1);
-        }
-
+        assertThat(defaultPriority).isEqualTo(PRIORITY + 1);
         verify(userStoryRepository, times(1)).findHighestPriorityBasedOnColumn(col);
 
     }
 
     @Test
-    public void getDefaultPriorityBasedOnColumn_NoUserStoriesInColumnReturnsPriorityOf1() throws Exception {
-        final int PRIORITY = 1;
+    public void getDefaultPriorityBasedOnColumn_NoUserStoriesInColumnReturnsPriorityOf1() {
         ColumnEntity col = mock(ColumnEntity.class);
 
         when(userStoryRepository.findHighestPriorityBasedOnColumn(col)).thenReturn(null);
+        int defaultPriority = userStoryService.getDefaultPriority(col);
 
-        //Make method accessible
-        Method defaultPriorityMethod = UserStoryService.class.getDeclaredMethod("getDefaultPriority", ColumnEntity.class);
-        defaultPriorityMethod.setAccessible(true);
-        Object nextPriority = defaultPriorityMethod.invoke(userStoryService, col);
-
-        if (!(nextPriority instanceof Integer)) {
-            // Will always assert
-            assertThat(true).isEqualTo(false);
-        } else {
-            assertThat((int) nextPriority).isEqualTo(PRIORITY);
-        }
-
+        assertThat(defaultPriority).isEqualTo(1);
         verify(userStoryRepository, times(1)).findHighestPriorityBasedOnColumn(col);
 
     }
@@ -351,6 +406,7 @@ public class UserStoryServiceTest {
         UserStoryEntity userStory = new UserStoryEntity();
         userStory.setName(US_NAME + " " + i);
         userStory.setDescription(US_DESCRIPTION + " " + i);
+        userStory.setPriority(i);
 
         ColumnEntity column = new ColumnEntity();
         column.setName(CN_NAME);

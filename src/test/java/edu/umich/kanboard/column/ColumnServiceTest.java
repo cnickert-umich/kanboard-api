@@ -91,7 +91,6 @@ public class ColumnServiceTest {
             columns.add(new ColumnEntity(i, "Garbage: " + i));
         }
 
-
         when(columnRepository.findAll()).thenReturn(columns);
         when(columnRepository.count()).thenReturn((long) columns.size());
         when(userStoryService.getAllUserStories()).thenReturn(Collections.emptyList());
