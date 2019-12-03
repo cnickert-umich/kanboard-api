@@ -21,15 +21,15 @@ public class ColumnService {
     public ColumnEntity createOrUpdateColumn(ColumnEntity column) {
 
         if (column.getName() == null || column.getName().equals("")) {
-            return null;
+            throw new ColumnExceptions.ColumnInvalidNameException(column.getName());
         }
 
         if (columnRepository.count() == ColumnConstants.MAX_COLUMNS) {
-            return null;
+            throw new ColumnExceptions.ColumnTooManyException();
         }
 
         if (column.getName().length() > ColumnConstants.MAX_COLUMN_STRING_LENGTH) {
-            return null;
+            throw new ColumnExceptions.ColumnNameTooLong();
         }
 
         return columnRepository.save(column);
@@ -37,7 +37,7 @@ public class ColumnService {
 
     public void deleteColumn(long columnId) {
         if (columnRepository.count() <= ColumnConstants.MIN_COLUMNS) {
-            return;
+            throw new ColumnExceptions.ColumnTooFewException();
         }
 
         List<ColumnEntity> columnEntities = new ArrayList<>();

@@ -107,7 +107,7 @@ public class UserStoryServiceTest {
         }
     }
 
-    @Test
+    @Test(expected = UserStoryExceptions.UserStoryBadPriorityException.class)
     public void updateUserStory_updatedPriority_tooLow() {
         final Integer NEW_PRIORITY = 0;
 
@@ -122,7 +122,7 @@ public class UserStoryServiceTest {
 
     }
 
-    @Test
+    @Test(expected = UserStoryExceptions.UserStoryBadPriorityException.class)
     public void updateUserStory_updatedPriority_tooHighExistingUserStory() {
         final Integer NEW_PRIORITY = 2;
 
@@ -138,7 +138,7 @@ public class UserStoryServiceTest {
     }
 
     @Test
-    public void updateUserStory_updatedPriority_tooHighNewUserStory() {
+    public void updateUserStory_updatedPriority_tooHighSetsPriority() {
         final Integer NEW_PRIORITY = 3;
 
         UserStoryEntity userStoryEntity = createUserStory();
@@ -146,10 +146,11 @@ public class UserStoryServiceTest {
         userStoryEntity.setId(null);
 
         when(userStoryRepository.findHighestPriorityBasedOnColumn(userStoryEntity.getColumn())).thenReturn(NEW_PRIORITY - 1);
+        when(userStoryRepository.save(userStoryEntity)).thenReturn(userStoryEntity);
         UserStoryEntity actual = userStoryService.saveUserStory(userStoryEntity);
 
-        assertThat(actual).isNull();
-        verify(userStoryRepository, times(0)).save(actual);
+        assertThat(actual).isEqualTo(userStoryEntity);
+        verify(userStoryRepository, times(1)).save(actual);
     }
 
     @Test
@@ -317,7 +318,7 @@ public class UserStoryServiceTest {
         assertThat(captor.getValue().getDescription()).isEqualTo(expected.getDescription());
     }
 
-    @Test
+    @Test(expected = UserStoryExceptions.UserStoryInvalidNameException.class)
     public void createUserStory_badPath_nullName() {
         UserStoryEntity userStory = createUserStory();
         userStory.setName(null);
@@ -329,7 +330,7 @@ public class UserStoryServiceTest {
 
     }
 
-    @Test
+    @Test(expected = UserStoryExceptions.UserStoryInvalidNameException.class)
     public void createUserStory_badPath_emptyStringName() {
         UserStoryEntity userStory = createUserStory();
         userStory.setName("");
@@ -340,7 +341,7 @@ public class UserStoryServiceTest {
         assertThat(result).isNull();
     }
 
-    @Test
+    @Test(expected = UserStoryExceptions.UserStoryInvalidDescriptionException.class)
     public void createUserStory_badPath_nullDescription() {
         UserStoryEntity userStory = createUserStory();
         userStory.setDescription(null);
@@ -352,7 +353,7 @@ public class UserStoryServiceTest {
 
     }
 
-    @Test
+    @Test(expected = UserStoryExceptions.UserStoryInvalidDescriptionException.class)
     public void createUserStory_badPath_emptyDescription() {
         UserStoryEntity userStory = createUserStory();
         userStory.setDescription("");
@@ -364,7 +365,7 @@ public class UserStoryServiceTest {
 
     }
 
-    @Test
+    @Test(expected = UserStoryExceptions.UserStoryNotFound.class)
     public void deleteUserStory_invalidId() {
         final long US_ID = 1;
 

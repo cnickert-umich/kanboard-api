@@ -39,17 +39,17 @@ public class ColumnServiceTest {
         assertThat(actual).isEqualTo(expected);
     }
 
-    @Test
+    @Test(expected = ColumnExceptions.ColumnInvalidNameException.class)
     public void createNewColumn_nullName() {
         ColumnEntity col = new ColumnEntity();
         col.setName(null);
 
         ColumnEntity actual = columnService.createOrUpdateColumn(col);
         verify(columnRepository, times(0)).save(col);
-        assertThat(actual).isNull();
+
     }
 
-    @Test
+    @Test(expected = ColumnExceptions.ColumnInvalidNameException.class)
     public void createNewColumn_emptyStringName() {
         ColumnEntity col = new ColumnEntity();
         col.setName("");
@@ -60,7 +60,7 @@ public class ColumnServiceTest {
 
     }
 
-    @Test
+    @Test(expected = ColumnExceptions.ColumnTooManyException.class)
     public void createNewColumn_tooManyColumns() {
         ColumnEntity newCol = new ColumnEntity();
         newCol.setName("yeet");
@@ -73,7 +73,7 @@ public class ColumnServiceTest {
         assertThat(result).isNull();
     }
 
-    @Test
+    @Test(expected = ColumnExceptions.ColumnNameTooLong.class)
     public void createNewColumn_nameTooLong() {
         ColumnEntity expected = new ColumnEntity();
         expected.setName(StringUtils.repeat("*", ColumnConstants.MAX_COLUMN_STRING_LENGTH + 1));
@@ -85,7 +85,7 @@ public class ColumnServiceTest {
     }
 
     @Test
-    public void deleteColumn_noUserStories() {
+    public void deleteColumn_noUserStoriesToUpdate() {
         List<ColumnEntity> columns = new ArrayList<>();
         for (long i = 0; i < ColumnConstants.MAX_COLUMNS; i++) {
             columns.add(new ColumnEntity(i, "Garbage: " + i));
@@ -133,7 +133,7 @@ public class ColumnServiceTest {
         }
     }
 
-    @Test
+    @Test(expected = ColumnExceptions.ColumnTooFewException.class)
     public void deleteColumn_failDoesNotMeetMinimumColumnRequirements() {
         ColumnEntity col = mock(ColumnEntity.class);
         long colIndexToDelete = 0;

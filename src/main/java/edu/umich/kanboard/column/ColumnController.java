@@ -31,7 +31,8 @@ public class ColumnController {
 
     @ApiOperation(value = "Creates or Updates a Column", notes = "Will update or save a column based on if the column already exists", response = UserStoryEntity.class, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Success")
+            @ApiResponse(code = 200, message = "Success"),
+            @ApiResponse(code = 400, message = "Bad Request")
     })
     @PostMapping("/column")
     @CrossOrigin
@@ -45,13 +46,13 @@ public class ColumnController {
     @ApiOperation(value = "Delete a Column", notes = "Deletes a column", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success"),
-            @ApiResponse(code = 404, message = "Not Found")
+            @ApiResponse(code = 400, message = "Bad Request")
     })
     @DeleteMapping("/column/{id}")
     @CrossOrigin
     public ResponseEntity<ColumnEntity> deleteColumn(@PathVariable Long id) {
         columnService.deleteColumn(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
 }

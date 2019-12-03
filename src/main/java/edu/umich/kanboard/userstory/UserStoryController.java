@@ -29,7 +29,8 @@ public class UserStoryController {
 
     @ApiOperation(value = "Get a User Story", notes = "Gets a user story given an id", response = UserStoryEntity.class, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Success")
+            @ApiResponse(code = 200, message = "Success"),
+            @ApiResponse(code = 404, message = "Not found")
     })
     @GetMapping("/us/{id}")
     @CrossOrigin
@@ -54,12 +55,13 @@ public class UserStoryController {
 
     @ApiOperation(value = "Delete a User Story", notes = "Deletes a Specific User Story", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Success")
+            @ApiResponse(code = 200, message = "Success"),
+            @ApiResponse(code = 404, message = "Not found")
     })
     @DeleteMapping("/us/{id}")
     @CrossOrigin
     public ResponseEntity<?> deleteUserStory(@PathVariable Long id) {
         userStoryService.deleteUserStory(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 }

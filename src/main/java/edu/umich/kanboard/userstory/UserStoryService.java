@@ -33,13 +33,11 @@ public class UserStoryService {
         }
 
         if (userStoryToSave.getName() == null || userStoryToSave.getName().equals("")) {
-            // No user story name specified
-            return null;
+            throw new UserStoryExceptions.UserStoryInvalidNameException(userStoryToSave.getName());
         }
 
         if (userStoryToSave.getDescription() == null || userStoryToSave.getDescription().equals("")) {
-            // No user story description specified
-            return null;
+            throw new UserStoryExceptions.UserStoryInvalidDescriptionException(userStoryToSave.getDescription());
         }
 
         if (userStoryToSave.getPriority() == null) {
@@ -48,7 +46,7 @@ public class UserStoryService {
 
         if (userStoryToSave.getPriority() <= 0) {
             // Tried to set priority too low
-            return null;
+            throw new UserStoryExceptions.UserStoryBadPriorityException(userStoryToSave.getPriority());
         }
 
         // Check if user story is not new
@@ -56,7 +54,7 @@ public class UserStoryService {
 
             if (userStoryToSave.getPriority() >= getDefaultPriority(userStoryToSave.getColumn())) {
                 // Tried to set priority too high
-                return null;
+                throw new UserStoryExceptions.UserStoryBadPriorityException(userStoryToSave.getPriority());
             }
 
             UserStoryEntity existingUserStory = userStoryRepository.findById(userStoryToSave.getId()).get();
@@ -106,13 +104,11 @@ public class UserStoryService {
                         userStory.setPriority(userStory.getPriority() + 1);
                         userStoryRepository.save(userStory);
                     }
-
-
                 }
             }
         } else if (userStoryToSave.getPriority() > getDefaultPriority(userStoryToSave.getColumn())) {
             // Tried to set priority too high
-            return null;
+            throw new UserStoryExceptions.UserStoryBadPriorityException(userStoryToSave.getPriority());
         }
 
         return userStoryRepository.save(userStoryToSave);
@@ -121,7 +117,7 @@ public class UserStoryService {
     public void deleteUserStory(Long id) {
         Optional<UserStoryEntity> userStoryToDelete = userStoryRepository.findById(id);
         if (!userStoryToDelete.isPresent()) {
-            return;
+            throw new UserStoryExceptions.UserStoryNotFound();
         }
 
         List<UserStoryEntity> updateUserStories = userStoryRepository.findAll().stream()
