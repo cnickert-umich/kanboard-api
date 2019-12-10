@@ -26,10 +26,12 @@ dependencies {
 	implementation 'org.apache.commons:commons-lang3:3.0'
 	implementation 'com.google.code.findbugs:jsr305:3.0.2'
 	implementation 'org.json:json:20090211'
-
-	compileOnly 'org.projectlombok:lombok'
+	compile('org.projectlombok:lombok')
 	runtimeOnly 'org.postgresql:postgresql'
 	runtimeOnly 'com.h2database:h2'
+	compile('javax.xml.bind:jaxb-api:2.3.0')
+	compile("org.springframework.boot:spring-boot-starter-security")
+	compile("com.auth0:java-jwt:3.4.0")
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

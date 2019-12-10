@@ -1,8 +1,12 @@
 package edu.umich.kanboard;
 
+
 import edu.umich.kanboard.column.ColumnExceptions;
+import edu.umich.kanboard.user.UserExceptions;
 import edu.umich.kanboard.userstory.UserStoryExceptions;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AuthorizationServiceException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -10,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @ControllerAdvice
+
 public class CustomGlobalExceptionHandler {
 
     @ExceptionHandler({
@@ -26,9 +31,18 @@ public class CustomGlobalExceptionHandler {
             ColumnExceptions.ColumnTooFewException.class,
             ColumnExceptions.ColumnTooManyException.class,
             ColumnExceptions.ColumnInvalidNameException.class,
-            ColumnExceptions.ColumnNameTooLong.class
+            ColumnExceptions.ColumnNameTooLong.class,
+            UserExceptions.UserAlreadyExistsException.class,
+            UsernameNotFoundException.class
     })
     public void badRequestErrorCode(HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.BAD_REQUEST.value());
     }
+
+    @ExceptionHandler({AuthorizationServiceException.class})
+    public void unauthorizedErrorCode(HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.UNAUTHORIZED.value());
+    }
+
+
 }
