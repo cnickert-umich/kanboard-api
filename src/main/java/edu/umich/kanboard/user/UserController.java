@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.OperationNotSupportedException;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping()
@@ -56,4 +57,13 @@ public class UserController {
     void logout() throws OperationNotSupportedException {
         throw new OperationNotSupportedException();
     }
+
+    @RequestMapping(value= "/**", method=RequestMethod.OPTIONS)
+    public void corsHeaders(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
+    }
+
 }
