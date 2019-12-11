@@ -56,7 +56,7 @@ public class UserStoryServiceTest {
     public void getUserStoryById() {
         final long USER_STORY_ID = 1;
         UserStoryEntity expected = new UserStoryEntity();
-        expected.setId(USER_STORY_ID);
+        expected.setUserStoryId(USER_STORY_ID);
 
         when(userStoryRepository.findById(USER_STORY_ID)).thenReturn(Optional.of(expected));
         UserStoryEntity actual = userStoryService.getUserStoryById(USER_STORY_ID);
@@ -75,7 +75,7 @@ public class UserStoryServiceTest {
         //Create user stories in same column
         for (int i = 1; i <= 5; i++) {
             UserStoryEntity userStory = createUserStory(i);
-            userStory.setId((long) i);
+            userStory.setUserStoryId((long) i);
             userStory.setColumn(col);
             when(userStoryRepository.findById((long) i)).thenReturn(Optional.of(userStory));
             userStoryList.add(userStory);
@@ -83,7 +83,7 @@ public class UserStoryServiceTest {
 
         // Copy the last user story with updated priority
         UserStoryEntity updatedUserStory = createUserStory(userStoryList.size());
-        updatedUserStory.setId((long) userStoryList.size());
+        updatedUserStory.setUserStoryId((long) userStoryList.size());
         updatedUserStory.setPriority(NEW_PRIORITY);
         updatedUserStory.setColumn(col);
 
@@ -128,7 +128,7 @@ public class UserStoryServiceTest {
 
         UserStoryEntity userStoryEntity = createUserStory();
         userStoryEntity.setPriority(NEW_PRIORITY);
-        userStoryEntity.setId((long) 1);
+        userStoryEntity.setUserStoryId((long) 1);
 
         when(userStoryRepository.findHighestPriorityBasedOnColumn(userStoryEntity.getColumn())).thenReturn(NEW_PRIORITY - 1);
         UserStoryEntity actual = userStoryService.saveUserStory(userStoryEntity);
@@ -143,7 +143,7 @@ public class UserStoryServiceTest {
 
         UserStoryEntity userStoryEntity = createUserStory();
         userStoryEntity.setPriority(NEW_PRIORITY);
-        userStoryEntity.setId(null);
+        userStoryEntity.setUserStoryId(null);
 
         when(userStoryRepository.findHighestPriorityBasedOnColumn(userStoryEntity.getColumn())).thenReturn(NEW_PRIORITY - 1);
         when(userStoryRepository.save(userStoryEntity)).thenReturn(userStoryEntity);
@@ -163,7 +163,7 @@ public class UserStoryServiceTest {
         //Create user stories in same column
         for (int i = 1; i <= 5; i++) {
             UserStoryEntity userStory = createUserStory(i);
-            userStory.setId((long) i);
+            userStory.setUserStoryId((long) i);
             userStory.setColumn(col);
             when(userStoryRepository.findById((long) i)).thenReturn(Optional.of(userStory));
             userStoryList.add(userStory);
@@ -171,7 +171,7 @@ public class UserStoryServiceTest {
 
         // Copy the last user story with updated priority
         UserStoryEntity updatedUserStory = createUserStory(1);
-        updatedUserStory.setId((long) 1);
+        updatedUserStory.setUserStoryId((long) 1);
         updatedUserStory.setPriority(NEW_PRIORITY);
         updatedUserStory.setColumn(col);
 
@@ -213,7 +213,7 @@ public class UserStoryServiceTest {
         //Create user stories in first column
         for (int i = 1; i <= 5; i++) {
             UserStoryEntity userStory = createUserStory();
-            userStory.setId((long) i);
+            userStory.setUserStoryId((long) i);
             userStory.setPriority(i);
             userStory.setColumn(col1);
             when(userStoryRepository.findById((long) i)).thenReturn(Optional.of(userStory));
@@ -222,7 +222,7 @@ public class UserStoryServiceTest {
 
         // Make copy of the first user story and update column
         UserStoryEntity updatedUserStory = createUserStory();
-        updatedUserStory.setId((long) 1);
+        updatedUserStory.setUserStoryId((long) 1);
         updatedUserStory.setPriority(1);
         updatedUserStory.setColumn(col2);
 
@@ -370,7 +370,7 @@ public class UserStoryServiceTest {
         final long US_ID = 1;
 
         UserStoryEntity userStory = createUserStory();
-        userStory.setId(US_ID);
+        userStory.setUserStoryId(US_ID);
 
         when(userStoryRepository.findById(US_ID)).thenReturn(Optional.empty());
         userStoryService.deleteUserStory(US_ID);
@@ -383,7 +383,7 @@ public class UserStoryServiceTest {
         final int PRIORITY = 1;
 
         UserStoryEntity userStoryToDelete = createUserStory();
-        userStoryToDelete.setId(US_ID);
+        userStoryToDelete.setUserStoryId(US_ID);
         userStoryToDelete.setPriority(PRIORITY);
 
         List<UserStoryEntity> userStories = new ArrayList<>();

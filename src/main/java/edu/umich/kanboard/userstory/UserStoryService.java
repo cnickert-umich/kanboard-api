@@ -50,14 +50,14 @@ public class UserStoryService {
         }
 
         // Check if user story is not new
-        if (userStoryToSave.getId() != null) {
+        if (userStoryToSave.getUserStoryId() != null) {
 
             if (userStoryToSave.getPriority() >= getDefaultPriority(userStoryToSave.getColumn())) {
                 // Tried to set priority too high
                 throw new UserStoryExceptions.UserStoryBadPriorityException(userStoryToSave.getPriority());
             }
 
-            UserStoryEntity existingUserStory = userStoryRepository.findById(userStoryToSave.getId()).get();
+            UserStoryEntity existingUserStory = userStoryRepository.findById(userStoryToSave.getUserStoryId()).get();
 
             // Check if column changed
             if (!existingUserStory.getColumn().equals(userStoryToSave.getColumn())) {

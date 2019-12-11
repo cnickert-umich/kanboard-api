@@ -99,18 +99,18 @@ public class UserStoryControllerTest {
     public void deleteUserStory_userStoryNotFound() throws Exception {
         UserStoryEntity userStory = new UserStoryEntity();
         userStory.setName(null);
-        userStory.setId((long) 1);
-        Mockito.doThrow(UserStoryExceptions.UserStoryNotFound.class).when(userStoryService).deleteUserStory(userStory.getId());
-        delete("/us/" + userStory.getId(), objectMapper.writeValueAsString(userStory)).andExpect(status().isNotFound()).andReturn();
+        userStory.setUserStoryId((long) 1);
+        Mockito.doThrow(UserStoryExceptions.UserStoryNotFound.class).when(userStoryService).deleteUserStory(userStory.getUserStoryId());
+        delete("/us/" + userStory.getUserStoryId(), objectMapper.writeValueAsString(userStory)).andExpect(status().isNotFound()).andReturn();
     }
 
     @Test
     public void deleteUserStory_happyPath() throws Exception {
         UserStoryEntity userStory = new UserStoryEntity();
         userStory.setName(null);
-        userStory.setId((long) 1);
-        Mockito.doNothing().when(userStoryService).deleteUserStory(userStory.getId());
-        delete("/us/" + userStory.getId(), objectMapper.writeValueAsString(userStory)).andExpect(status().isOk()).andReturn();
+        userStory.setUserStoryId((long) 1);
+        Mockito.doNothing().when(userStoryService).deleteUserStory(userStory.getUserStoryId());
+        delete("/us/" + userStory.getUserStoryId(), objectMapper.writeValueAsString(userStory)).andExpect(status().isOk()).andReturn();
     }
 
 
