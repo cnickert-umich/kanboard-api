@@ -83,7 +83,7 @@ public class UserStoryController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success")
     })
-    @DeleteMapping("/us/{id}")
+    @PostMapping("/us/{id}")
     @CrossOrigin
     public ResponseEntity<UserStoryEntity> deleteUserStory(@PathVariable Long id) {
         UserStoryEntity userStoryEntity = userStoryRepository.findByUserStoryId(id);
